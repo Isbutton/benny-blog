@@ -148,12 +148,12 @@ exit
 ```
 
 #### 导入导出
-导出容器快照到本地文件
+导出`容器`快照到本地文件
 ```
 docker export 7691a814370e > ubuntu.tar
 ```
 
-可以使用`docker import`从容器快照文件中再导入为镜像，例如
+可以使用`docker import`从`容器`快照文件中再导入为`镜像`，例如
 ```
 $ cat ubuntu.tar | docker import - test/ubuntu:v1.0
 $ docker image ls
@@ -163,6 +163,19 @@ test/ubuntu         v1.0                9d37a6082e97        About a minute ago  
 此外，也可以通过指定 URL 或者某个目录来导入，例如
 ```
 docker import http://example.com/exampleimage.tgz example/imagerepo
+```
+
+#### save和load
+保存`镜像`到本地文件
+```
+docker save -o images.tar postgres:9.6 mongo:3.4
+```
+打包之后的`images.tar`包含`postgres:9.6`和`mongo:3.4`这两个镜像。
+
+可以使用`docker load`载入`镜像`
+```
+docker load -i images.tar
+
 ```
 
 #### 更新容器镜像
@@ -327,6 +340,36 @@ RUN npm run build
 
 CMD ["node", "server/app.js"]
 ```
+
+
+
+#### 打包两种方式
+1. 打包
+docker image build -t store-ads-admin_web:v20200706 .
+docker save -o store-ads-admin_web:v20200706.tar  store-ads-admin_web:v20200706
+
+1. 上传docker.oa.com
+docker image build -t store-ads-admin_web:v20200706 .
+docker push docker.oa.com/midas-web/store-ads-admin_web:V1.0R220
+
+#### 对应部署方式
+一、
+1. 执行`docker pull docker.oa.com/midas-web/store-ads-admin_web:{{version}}`，导入镜像文件到docker
+2. 执行`docker images`，可以看到你刚刚导入的镜像
+3. 执行`docker ps`，查看正在运行的docker实例，如果有该系统的运行实例，先通过`docker stop {{CONTAINER ID}}`停掉实例，然后`docker rm {{CONTAINER ID}}`销毁实例
+4. 修改web.sh里store-ads-admin_web:$VERSION 改为docker.oa.com/midas-web/store-ads-admin_web:$VERSION
+5. 修改`./env`中修改版本号为 V1.0R220
+6. 运行NodeJS容器：`./web.sh`
+
+二、
+1. 要求开发同学提供构建好的镜像文件，或从work平台下载CI构建出来的镜像文件，扩展名是.tar
+2. 将镜像文件上传到images目录下，文件命名规范是：{{tag}}:{{version}}，例如store-ads-admin_web:v20190627.tar
+3. 执行docker load -i images/store-ads-admin_web:{{version}}.tar，导入镜像文件到docker
+4. 执行docker images，可以看到你刚刚导入的镜像，tag就是版本号
+5. 执行docker ps，查看正在运行的docker实例，如果有该系统的运行实例，先通过docker stop store-ads-admin_web:{{version}}停掉实例，然后docker rm store-ads-admin_web:{{version}}销毁实例
+6. 修改.env中的版本号
+7. 运行NodeJS容器：./web.sh
+
 
 
 
