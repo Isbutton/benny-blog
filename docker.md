@@ -372,4 +372,32 @@ docker push docker.oa.com/midas-web/store-ads-admin_web:V1.0R220
 
 
 
+### 问题
+1. M1上pull mysql:5.6的镜像会报错
+`ERROR: no matching manifest for linux/arm64/v8 in the manifest list entries`
 
+因为mysql5.6的镜像是intel的架构，需要拉取适配M1芯片的镜像。
+
+例如
+`docker pull --platform linux/x86_64 mysql`
+
+docker-compose file里的写法
+```
+taskdb:
+     platform: linux/x86_64
+     image: mysql/mysql-server:8.0.23
+     volumes:
+       - ./data/task/mysql:/var/lib/mysql
+       - ./data/task/init_db:/docker-entrypoint-initdb.d
+     ports:
+       - "${TASK_DB_PORT}:3306"
+     restart: always
+     environment:
+       MYSQL_ROOT_PASSWORD: ${TASK_DB_PASSWORD}
+       MYSQL_DATABASE: ${TASK_DB_NAME}
+       MYSQL_USER: ${TASK_DB_USER}
+       MYSQL_PASSWORD: ${TASK_DB_PASSWORD}
+```
+
+2. 镜像不断重启
+首先查看日志 `docker logs c59ba37a2508`
