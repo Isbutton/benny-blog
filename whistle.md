@@ -1,14 +1,14 @@
 ### whistle
 
-#### 遇到的问题
-1. Method为CONNECT，配置代理未生效
+#### 使用点
+##### 1. Method为CONNECT，配置代理未生效
 ```
 Method为CONNECT | Host为Tunnel To
 很可能是因为没有开启https 【Capture HTTPS CONNECTs】
 ```
 
 
-2. 修改请求回包，配置的代理针对一个域名下的某个请求，通过请求的参数来区分
+##### 2. 修改请求回包，配置的代理针对一个域名下的某个请求，通过请求的参数来区分
 `区分改请求是GET还是POST`
 ```
 POST
@@ -56,7 +56,7 @@ if (queries.cmd == 26) {
 values['res'] = jsonpMethod + '(' + JSON.stringify(res) + ')'
 ```
 
-3. 替换整个请求回包
+##### 3. 替换整个请求回包
 ```
 # https://XXX/h5/store/XXX.php  resReplace://{whole_replace.js}
 
@@ -80,3 +80,45 @@ whole.js
 }
 ```
    
+##### 4. 在匹配pattern的页面中插入vConsole
+安装whistle.inspect插件
+```
+页面地址 whistle.inspect://
+```
+
+```
+页面地址 log://
+```
+可以在whistle的`Tools`里的console台看到页面打印信息
+
+##### 5. 页面跳转
+```
+/XX.XX.com/XXX/ redirect://https://baidu.com
+```
+
+如果跳转地址里有hash路由，则
+<pre>
+``` testUrl
+https://XX.XX.com/h5/store/index.shtml?XXX=XXX#/detail?XXX=XXX
+```
+/XX.XX.com/XXX/ redirect://{testUrl}
+</pre>
+
+
+
+##### 6. 模拟回包里的CSP
+```
+页面地址 resHeaders://{test-resHeaders.json}
+```
+
+test-resHeaders.json
+```
+Content-Security-Policy: default-src 'self' 'unsafe-inline' 'unsafe-eval' webcompt: weixin: data: jsbridge: http://*.sogou.com wss://*.qq.com uniwebview:;report-uri https://XX;img-src * data:;media-src h5tenvideo: http://*.qq.com https://*.qq.com wss://*.qq.com
+```
+
+##### 连上whistle后苹果支付无法拉起
+```
+**.apple.com disable://intercept #屏蔽iap支付抓包
+**.icloud.com disable://intercept
+```
+更多苹果域名可参考：https://github.com/alibaba/lightproxy/issues/149
