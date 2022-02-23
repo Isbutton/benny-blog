@@ -86,3 +86,18 @@ loop属性不是响应式的，更新swiper并不会更新loop属性，无法初
 
 #### 解决：
 通过组件的v-if控制来重新初始化swiper
+
+
+### 6. 页面上有两个loop的swiper，根据tab切换来展示其中一个swiper，且每次切换后的swiper要回到切换前的索引页。
+
+因为两个loop的swiper的滚动个数不一样，为了防止个数有问题，需要重新创建loop。
+
+```
+this.$nextTick(() => {
+ this.$refs.teamSwiper?.swiper?.loopDestroy()
+ this.$refs.teamSwiper?.swiper?.loopCreate()
+ this.$refs.teamSwiper?.swiper?.update()
+ this.$refs.teamSwiper?.swiper?.slideTo(this.teamActiveSwiperIndex)
+ this.$refs.teamSwiper?.swiper?.slideToLoop(this.teamActiveSwiperIndex) //在Loop模式下Swiper切换到指定slide。
+})
+```
